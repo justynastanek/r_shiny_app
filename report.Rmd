@@ -1,0 +1,111 @@
+---
+title: "Raport aplikacji zaliczeniowej"
+author: "JS"
+date: "17 czerwca 2019"
+output: html_document
+params:
+  n: 2019
+  x: 2
+  y: 2
+  z: !r c(2,3,4,5)
+---
+```{r, results = "hide", echo = FALSE}
+    
+    #set working directory
+    #setwd()
+    
+    source("pobieranie_danych.r")
+    data <- getNBPData(params$n)
+    d <- as.data.frame(data)
+    d[1] <- as.Date(d[,1])
+
+```
+
+##1. Szereg czasowy kursu waluty
+
+
+```{r, echo=F , results="asis", fig.height=5, fig.width=10, fig.cap="Szereg czasowy kursu"}
+
+library(ggplot2)
+    
+    wyk <- (
+      ggplot(d, aes(x = d[,1], y =  d[,as.numeric(params$x)] ))
+      +
+        geom_line(aes(y = d[,as.numeric(params$x)]), col = "orchid4", size = 1)
+      +
+        ggtitle(paste("Kurs ", colnames(d)[as.numeric(params$x)], params$n))
+      +
+        xlab("Data")
+      +
+        ylab("Kurs")
+      +
+        theme(plot.title=element_text(size=12, color = "magenta4", face ="bold", hjust = 0.5), panel.background = element_rect(fill = "transparent",colour = NA))
+      )
+    
+    print(wyk) 
+
+
+```
+
+##2. Wykres punktowy dwóch wybranych kursów walut
+
+
+```{r, echo=F , results="asis", fig.height=5, fig.width=10, fig.cap="Wykres punktowy kursów"}
+
+    
+    wyk2 <- (
+        ggplot(d, aes(x = d[,1]))
+      +
+        geom_point(aes(y = d[,as.numeric(params$x)]), col = "navy")
+      +
+        geom_point(aes(y = d[,as.numeric(params$y)]), col = "green4")
+      +
+        ggtitle(paste("Kurs ", colnames(d)[as.numeric(params$x)], colnames(d)[as.numeric(params$y)], params$n))
+      +
+        xlab("Data")
+      +
+        ylab("Kurs")
+      +
+        theme(plot.title=element_text(size=12, face ="bold", hjust = 0.5), panel.background = element_rect(fill = "transparent",colour = NA))
+    )
+        
+    
+    
+    print(wyk2)
+
+
+```
+
+##3. Macierz korelacji przyrostów wybranego podzbioru kursów walut
+
+
+```{r, echo=F , results="asis", fig.height=5, fig.width=10, fig.cap="Macierz korelacji"}
+
+library(knitr)
+
+      d2 <- d[,as.numeric(params$z)]
+      d3 <- data.frame(diff(as.matrix(d2)))
+      res <- cor(d3, d3)
+      kable(x = res, digits = 2)
+
+
+```
+
+##4.Wykres korelacji
+
+
+```{r, echo=F , results="asis", fig.height=5, fig.width=10, fig.cap="Wykres korelacji"}
+
+library(ggcorrplot)
+
+wyk3 <- ggcorrplot(res, hc.order = TRUE, type = "lower",lab = TRUE, title = "Wykres korelacji wybranych walut")
+    
+    print(wyk3)
+
+
+```
+
+
+
+
+
